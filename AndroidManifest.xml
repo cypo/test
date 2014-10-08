@@ -22,6 +22,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.example.test.List"
+            android:label="@string/title_activity_list" >
+        </activity>
     </application>
-
+<uses-permission android:name="android.permission.INTERNET" />
 </manifest>
