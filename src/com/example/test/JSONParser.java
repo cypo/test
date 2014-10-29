@@ -16,9 +16,7 @@ public class JSONParser {
     static InputStream is = null;
     static JSONObject jObj = null;
     static String json = "";
-    // constructor
-    public JSONParser() {
-    }
+
     public JSONObject getJSONFromUrl(String url) {
         // Making HTTP request
         try {
@@ -40,7 +38,7 @@ public class JSONParser {
             StringBuilder sb = new StringBuilder();
             String line = null;
             while ((line = reader.readLine()) != null) {
-                sb.append(line + "n");
+                sb.append(line + "\n");
             }
             is.close();
             json = sb.toString();
