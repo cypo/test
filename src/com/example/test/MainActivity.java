@@ -55,7 +55,8 @@ public class MainActivity extends Activity {
 	    btngetdata.setOnClickListener(new View.OnClickListener() {
 	      @Override
 	      public void onClick(View view) {
-	             new JSONParse().execute();
+	    	  clubList.clear();
+	    	  new JSONParse().execute();
 	      }
            });
 	}
@@ -118,6 +119,7 @@ public class MainActivity extends Activity {
            map.put(TAG_SHOT, shot);
            clubList.add(map);
            
+           
            list=(ListView)findViewById(R.id.listView1);
            ListAdapter adapter = new SimpleAdapter(
         		   				MainActivity.this, 
@@ -125,6 +127,7 @@ public class MainActivity extends Activity {
         		   				R.layout.activity_list,
         		   				new String[] { TAG_NAME, TAG_GENDER, TAG_ADRESS, TAG_BEER, TAG_SHOT }, 
         		   				new int[] {	R.id.name,R.id.gender, R.id.adress, R.id.beer, R.id.shot });
+           
            list.setAdapter(adapter);
            
            list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
