@@ -9,6 +9,8 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -19,26 +21,27 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 public class MainActivity extends Activity {
+	
+	public String savedName;
 
-	public TextView name, gender, adress, beer, shot;
+	private TextView name, gender, adress, beer, shot;
 	private ListView list;
 	public Button btngetdata;
-	ArrayList<HashMap<String, String>> clubList = new ArrayList<HashMap<String, String>>();
+	private ArrayList<HashMap<String, String>> clubList = new ArrayList<HashMap<String, String>>();
 
 	  //URL to get JSON Array
-	  private static final String URL = "http://cypo.esy.es/lodz.json"; //dodaæ wyj¹tek jeœli serwer nie odpowiada/nie istnieje
+	  public static final String URL = "http://cypo.esy.es/lodz.json"; //dodaæ wyj¹tek jeœli serwer nie odpowiada/nie istnieje
 
 		//JSON Node Names
-	  private static final String TAG_CLUBS = "kluby";
-	  private static final String TAG_NAME = "name";
-	  private static final String TAG_GENDER = "gender";
-	  private static final String TAG_ADRESS = "adress";
-	  private static final String TAG_BEER = "beer";
-	  private static final String TAG_SHOT = "shot";
+	  public static final String TAG_CLUBS = "kluby";
+	  public static final String TAG_NAME = "name";
+	  public static final String TAG_GENDER = "gender";
+	  public static final String TAG_ADRESS = "adress";
+	  public static final String TAG_BEER = "beer";
+	  public static final String TAG_SHOT = "shot";
 	  
 	  private static final String GETTING_DATA = "Pobieranie danych...";
 	  
@@ -105,6 +108,7 @@ public class MainActivity extends Activity {
            for(int i=0; i<jArray.length(); i++){
            JSONObject c = jArray.getJSONObject(i);
            // Storing  JSON item in a Variable
+           String id = c.getString("Id");
            String name = c.getString(TAG_NAME);
            String gender = c.getString(TAG_GENDER);
            String adress = c.getString(TAG_ADRESS);
@@ -117,6 +121,7 @@ public class MainActivity extends Activity {
            map.put(TAG_ADRESS, adress);
            map.put(TAG_BEER, beer);
            map.put(TAG_SHOT, shot);
+           map.put("Id", id);
            clubList.add(map);
            
            
@@ -133,7 +138,10 @@ public class MainActivity extends Activity {
            list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                    @Override
                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                       Toast.makeText(MainActivity.this, clubList.get(+position).get("name"), Toast.LENGTH_SHORT).show();
+                      //Toast.makeText(MainActivity.this, clubList.get(+position).get("name"), Toast.LENGTH_SHORT).show();
+                	  Intent intent = new Intent(getApplicationContext(), Details.class);
+                	  intent.putExtra("id", clubList.get(+position).get("Id"));
+                	  startActivity(intent);
                    }
                });
            }
