@@ -1,8 +1,5 @@
 package com.example.test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,37 +11,34 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
+
 
 public class Details extends Activity {
-	public String jsonName, jsonGender, jsonAdress, jsonBeer, jsonShot;
-	private TextView name, gender, adress, beer, shot, savedIdTV;
+	public String jsonName, jsonGender, jsonAdress, jsonBeer, jsonShot, jsonLogo, jsonDescription;
+	private TextView name, gender, adress, beer, shot, description, savedIdTV;
 	public String savedId;
-	private ArrayList<HashMap<String, String>> clubList = new ArrayList<HashMap<String, String>>();
-    HashMap<String, String> map = new HashMap<String, String>();
 	JSONArray jArray = null;
-	
-	
-	
+	ImageView logo;
+		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_details);
-		
-		try{
+		getActionBar().setTitle(R.string.details);
+				
 			Intent intent = getIntent();
 			savedId = intent.getStringExtra("id");
-			}
-		catch(NullPointerException e){
-			name.setText("NULL!!");
-		}
-
-		
-			new JSONParse2().execute();
+					
+			new JSONParse().execute();
 			
-		 savedIdTV = (TextView)findViewById(R.id.savedId);
-		 savedIdTV.setText(savedId);
+			//niepotrzebne
+			savedIdTV = (TextView)findViewById(R.id.savedId);
+			savedIdTV.setText(savedId);
+			
 
 	}
 
@@ -69,7 +63,7 @@ public class Details extends Activity {
 	
 
 	//Tworzenie procesu asynctask
-	   public class JSONParse2 extends AsyncTask<String, String, JSONObject> {
+	   public class JSONParse extends AsyncTask<String, String, JSONObject> {
 		   
 		     private ProgressDialog pDialog;
 	       @Override
@@ -106,30 +100,33 @@ public class Details extends Activity {
 	           jsonAdress = c.getString(MainActivity.TAG_ADRESS);
 	           jsonBeer = c.getString(MainActivity.TAG_BEER);
 	           jsonShot = c.getString(MainActivity.TAG_SHOT);
+	           jsonDescription = c.getString(MainActivity.TAG_DESCRIPTION);
+	           jsonLogo = c.getString(MainActivity.TAG_LOGO);
 	                          	         	           
 	           name = (TextView)findViewById(R.id.detailsName);
 	           gender = (TextView)findViewById(R.id.detailsGender);
 	           adress = (TextView)findViewById(R.id.detailsAdress);
 	           beer = (TextView)findViewById(R.id.detailsBeer);
 	           shot = (TextView)findViewById(R.id.detailsShot);
+	           description = (TextView)findViewById(R.id.detailsDescription);
+	           
 	        		   
 	           name.setText(jsonName);
 	           gender.setText(jsonGender);
 	           adress.setText(jsonAdress);
 	           beer.setText(jsonBeer);
 	           shot.setText(jsonShot);
+	           description.setText(jsonDescription);
+	   	           
+				logo = (ImageView)findViewById(R.id.logo);
+				Picasso.with(getApplicationContext()).load(jsonLogo).into(logo);
 	           
-	           Toast.makeText(Details.this, jsonName, Toast.LENGTH_SHORT).show();
-
-	           
-	       } catch (JSONException e) {
+	        	} 
+	        catch (JSONException e) {
 	         e.printStackTrace();
 	       }
-	      }
-	   
 
-	   
-	   }   
-	
-	
-}
+	        
+	      }
+	    }   
+	}
