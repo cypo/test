@@ -29,6 +29,7 @@ public class Details extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_details);
 		getActionBar().setTitle(R.string.details);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 				
 			Intent intent = getIntent();
 			savedId = intent.getStringExtra("id");

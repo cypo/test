@@ -8,8 +8,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -20,16 +25,19 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class MainActivity extends Activity {
 	
 	public String savedName;
 
-	private TextView name, gender, adress, beer, shot;
+	private TextView name, gender, adress, beer, shot, gps;
 	private ListView list;
 	public Button btngetdata;
 	private ArrayList<HashMap<String, String>> clubList = new ArrayList<HashMap<String, String>>();
+	private LocationManager lm;
+	private LocationListener ll;
 
 	  //URL to get JSON Array
 	  public static final String URL = "http://cypo.esy.es/lodz.json"; //dodaæ wyj¹tek jeœli serwer nie odpowiada/nie istnieje
@@ -45,6 +53,7 @@ public class MainActivity extends Activity {
 	  public static final String TAG_LOGO = "logo";
 	  
 	  private static final String GETTING_DATA = "Pobieranie danych...";
+	  private static final String PROX_ALERT_INTENT = "com.example.test.Details";
 	  
 	  JSONArray jArray = null;
 
@@ -64,12 +73,58 @@ public class MainActivity extends Activity {
 	    	  new JSONParse().execute();
 	      }
            });
+	    
+	    lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+	    ll = new MyLocationListener();
+	        
+	    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);  
+	    gps = (TextView)findViewById(R.id.gps);
+	    
+	    Intent intent = new Intent(PROX_ALERT_INTENT);
+        PendingIntent proximityIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+
+	    
+	    lm.addProximityAlert(51.85583378, 19.42924514, 1, -1, proximityIntent);
+	
+	    
 	}
+	
+	 
+	   /* private void addProximityAlert(double latitude, double longitude) {
+	    	
+	    			Intent intent = new Intent(PROX_ALERT_INTENT);
+	    	        PendingIntent proximityIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+	    		         
+	    	        locationManager.addProximityAlert(
+	    	            latitude, // the latitude of the central point of the alert region
+	    	            longitude, // the longitude of the central point of the alert region
+	    	            POINT_RADIUS, // the radius of the central point of the alert region, in meters
+	    	            PROX_ALERT_EXPIRATION, // time for this proximity alert, in milliseconds, or -1 to indicate no expiration
+	    	            proximityIntent // will be used to generate an Intent to fire when entry to or exit from the alert region is detected
+	    	          );
+	    		         
+	    	        	IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT); 
+	    		       registerReceiver(new ProximityIntentReceiver(), filter);
+	    		        
+	    		    }*/
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
+	}
+	
+	@Override
+	public void onPause(){
+		super.onPause();
+		lm.removeUpdates(ll);
+	}
+	
+	@Override
+	public void onResume(){
+		super.onResume();
+		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll); 
 	}
 	
 	//Tworzenie procesu asynctask
@@ -151,4 +206,31 @@ public class MainActivity extends Activity {
        }
       }
    }   
+  private class MyLocationListener implements LocationListener 
+   {           
+       @Override
+       public void onLocationChanged(Location loc) {
+           if (loc != null) {
+
+               gps.setText("Szerokoœæ: "+ loc.getLatitude() + " D³ugoœæ: " + loc.getLongitude());
+           }
+       }       @Override
+               public void onProviderDisabled(String provider) {
+                       // TODO Auto-generated method stub
+                       
+               }
+
+       			@Override
+               public void onProviderEnabled(String provider) {
+                       // TODO Auto-generated method stub
+                       
+               }
+
+       			@Override
+               public void onStatusChanged(String provider, int status, Bundle extras) {
+                       // TODO Auto-generated method stub
+                       
+               }
+   }
+
 }
