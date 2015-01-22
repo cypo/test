@@ -1,5 +1,7 @@
 package com.example.test;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -12,13 +14,17 @@ import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListAdapter;
@@ -28,13 +34,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+
 public class MainActivity extends Activity {
 	
 	public String savedName;
 
 	private TextView name, gender, adress, beer, shot, gps;
 	private ListView list;
-	public Button btngetdata;
+	public Button btngetdata, getLocationBtn;
 	private ArrayList<HashMap<String, String>> clubList = new ArrayList<HashMap<String, String>>();
 	private LocationManager lm;
 	private LocationListener ll;
@@ -53,7 +60,13 @@ public class MainActivity extends Activity {
 	  public static final String TAG_LOGO = "logo";
 	  
 	  private static final String GETTING_DATA = "Pobieranie danych...";
-	  private static final String PROX_ALERT_INTENT = "com.example.test.Details";
+	  private static final String PROX_ALERT_INTENT = "com.example.test.ProximityAlert";
+	  
+	  private static final NumberFormat nf = new DecimalFormat("##.########");
+	  private static final String POINT_LATITUDE_KEY = "POINT_LATITUDE_KEY";
+	  private static final String POINT_LONGITUDE_KEY = "POINT_LONGITUDE_KEY";
+
+
 	  
 	  JSONArray jArray = null;
 
@@ -75,39 +88,104 @@ public class MainActivity extends Activity {
            });
 	    
 	    lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+	    lm.requestLocationUpdates(
+	    		                        LocationManager.GPS_PROVIDER,
+	    		                        1000,
+	    		                        1,
+	    		                        new MyLocationListener()
+	    		        );
+
+	    
 	    ll = new MyLocationListener();
 	        
 	    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);  
 	    gps = (TextView)findViewById(R.id.gps);
 	    
-	    Intent intent = new Intent(PROX_ALERT_INTENT);
-        PendingIntent proximityIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-
+	    getLocationBtn = (Button)findViewById(R.id.getLocationBtn);
+	    getLocationBtn.setOnClickListener(new OnClickListener() {           
+	    	            @Override
+	    	            public void onClick(View v) {
+	    	                saveProximityAlertPoint();
+	    	            }
+	    	        });
 	    
-	    lm.addProximityAlert(51.85583378, 19.42924514, 1, -1, proximityIntent);
-	
+	   // addProximityAlert(51.8548, 19.4289);
 	    
 	}
 	
-	 
-	   /* private void addProximityAlert(double latitude, double longitude) {
+	
+    private void saveProximityAlertPoint() {
+        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (location==null) {
+            Toast.makeText(this, "No last known location. Aborting...", Toast.LENGTH_LONG).show();
+            return;
+        }
+            addProximityAlert(location.getLatitude(), location.getLongitude());
+            saveCoordinatesInPreferences((float)location.getLatitude(), (float)location.getLongitude());
+            Log.d("GPSStatus", String.valueOf(location.getLatitude())+" "+String.valueOf(location.getLongitude()));
+    }
+    
+		private void addProximityAlert(double latitude, double longitude) {
 	    	
 	    			Intent intent = new Intent(PROX_ALERT_INTENT);
-	    	        PendingIntent proximityIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+	    	        PendingIntent proximityIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
 	    		         
-	    	        locationManager.addProximityAlert(
-	    	            latitude, // the latitude of the central point of the alert region
-	    	            longitude, // the longitude of the central point of the alert region
-	    	            POINT_RADIUS, // the radius of the central point of the alert region, in meters
-	    	            PROX_ALERT_EXPIRATION, // time for this proximity alert, in milliseconds, or -1 to indicate no expiration
-	    	            proximityIntent // will be used to generate an Intent to fire when entry to or exit from the alert region is detected
+	    	        lm.addProximityAlert(
+	    	        	latitude, // the latitude of the central point of the alert region
+	    	        	longitude, // the longitude of the central point of the alert region
+	    	            5000, // the radius of the central point of the alert region, in meters
+	    	            -1, // time for this proximity alert, in milliseconds, or -1 to indicate no expiration
+	    	            proximityIntent// will be used to generate an Intent to fire when entry to or exit from the alert region is detected
 	    	          );
 	    		         
-	    	        	IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT); 
-	    		       registerReceiver(new ProximityIntentReceiver(), filter);
+	    	        IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT); 
+	    		    registerReceiver(new ProximityIntentReceiver(), filter);
 	    		        
-	    		    }*/
+	    		    }
+		
+/*		 private void populateCoordinatesFromLastKnownLocation() {
+			         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
+			         if (location!=null) {
+			             latitudeEditText.setText(nf.format(location.getLatitude()));
+			             longitudeEditText.setText(nf.format(location.getLongitude()));
+			         }
+			     }
+*/
+			     private void saveCoordinatesInPreferences(float latitude, float longitude) {
+			         SharedPreferences prefs = this.getSharedPreferences(getClass().getSimpleName(), Context.MODE_PRIVATE);
+			         SharedPreferences.Editor prefsEditor = prefs.edit();
+			         prefsEditor.putFloat(POINT_LATITUDE_KEY, latitude);
+			         prefsEditor.putFloat(POINT_LONGITUDE_KEY, longitude);
+			         prefsEditor.commit();
+			     }
+
+			     private Location retrievelocationFromPreferences() {
+			         SharedPreferences prefs = this.getSharedPreferences(getClass().getSimpleName(), Context.MODE_PRIVATE);
+			         Location location = new Location("POINT_LOCATION");
+			         location.setLatitude(prefs.getFloat(POINT_LATITUDE_KEY, 0));
+			         location.setLongitude(prefs.getFloat(POINT_LONGITUDE_KEY, 0));
+			         return location;
+			     }
+
+		
+		
+		public class MyLocationListener implements LocationListener {
+	        public void onLocationChanged(Location location) {
+			            Location pointLocation = retrievelocationFromPreferences();
+			            float distance = location.distanceTo(pointLocation);
+			            Toast.makeText(MainActivity.this, "Distance from Point:"+distance, Toast.LENGTH_LONG).show();
+			            gps.setText("Szerokoœæ: "+ location.getLatitude() + " D³ugoœæ: " + location.getLongitude());
+			        }
+			        public void onStatusChanged(String s, int i, Bundle b) {           
+			        }
+			        public void onProviderDisabled(String s) {
+			        }
+			        public void onProviderEnabled(String s) {           
+			        }
+			    }
+
+		
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -206,7 +284,7 @@ public class MainActivity extends Activity {
        }
       }
    }   
-  private class MyLocationListener implements LocationListener 
+/*  private class MyLocationListener implements LocationListener 
    {           
        @Override
        public void onLocationChanged(Location loc) {
@@ -231,6 +309,6 @@ public class MainActivity extends Activity {
                        // TODO Auto-generated method stub
                        
                }
-   }
+   }*/
 
 }
