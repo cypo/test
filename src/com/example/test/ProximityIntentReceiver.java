@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.location.LocationManager;
 import android.util.Log;
+import android.widget.Toast;
 
 public class ProximityIntentReceiver extends BroadcastReceiver {
 
@@ -22,7 +23,7 @@ public class ProximityIntentReceiver extends BroadcastReceiver {
         String key = LocationManager.KEY_PROXIMITY_ENTERING;
         Boolean entering = intent.getBooleanExtra(key, false);
 
-        /*if (entering) {
+/*        if (entering) {
             Log.d(getClass().getSimpleName(), "entering");
         }
         else {
@@ -30,17 +31,21 @@ public class ProximityIntentReceiver extends BroadcastReceiver {
         }*/
         if (entering) {
             Log.d("GPSStatus", "entering");
+            Toast.makeText(context, "entering", Toast.LENGTH_SHORT).show();
         }
         else {
             Log.d("GPSStatus", "exiting");
+            Toast.makeText(context, "exiting", Toast.LENGTH_SHORT).show();
         }
         
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, null, 0);       
+        Intent intent2 = new Intent(context, ProximityAlert.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent2, PendingIntent.FLAG_ONE_SHOT, null); 
+        //Intent.FLAG_ACTIVITY_NEW_TASK
         Notification notification = createNotification();
 
-        notification.setLatestEventInfo(context, "Proximity Alert!", "You are near your point of interest.", pendingIntent);
+        notification.setLatestEventInfo(context, "Proximity Alert!", "Jesteœ blisko ustalonego punktu", pendingIntent);
         notificationManager.notify(NOTIFICATION_ID, notification);
     }
 

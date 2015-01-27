@@ -39,7 +39,7 @@ public class MainActivity extends Activity {
 	
 	public String savedName;
 
-	private TextView name, gender, adress, beer, shot, gps;
+	private TextView name, gender, adress, beer, shot, gps, dist;
 	private ListView list;
 	public Button btngetdata, getLocationBtn;
 	private ArrayList<HashMap<String, String>> clubList = new ArrayList<HashMap<String, String>>();
@@ -60,9 +60,10 @@ public class MainActivity extends Activity {
 	  public static final String TAG_LOGO = "logo";
 	  
 	  private static final String GETTING_DATA = "Pobieranie danych...";
-	  private static final String PROX_ALERT_INTENT = "com.example.test.ProximityAlert";
+	  private static final String PROX_ALERT_INTENT = "com.example.test.ProximityIntentReceiver";
 	  
 	  private static final NumberFormat nf = new DecimalFormat("##.########");
+	  private static final NumberFormat distFormat = new DecimalFormat("##.##");
 	  private static final String POINT_LATITUDE_KEY = "POINT_LATITUDE_KEY";
 	  private static final String POINT_LONGITUDE_KEY = "POINT_LONGITUDE_KEY";
 
@@ -76,8 +77,8 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		getActionBar().setTitle(R.string.app_name);
 				
-		new JSONParse().execute();
-		             
+
+// buttons, textViews
 		btngetdata = (Button)findViewById(R.id.btngetdata);
 	    btngetdata.setOnClickListener(new View.OnClickListener() {
 	      @Override
@@ -86,21 +87,9 @@ public class MainActivity extends Activity {
 	    	  new JSONParse().execute();
 	      }
            });
-	    
-	    lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-	    lm.requestLocationUpdates(
-	    		                        LocationManager.GPS_PROVIDER,
-	    		                        1000,
-	    		                        1,
-	    		                        new MyLocationListener()
-	    		        );
-
-	    
-	    ll = new MyLocationListener();
-	        
-	    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);  
 	    gps = (TextView)findViewById(R.id.gps);
-	    
+	    dist = (TextView)findViewById(R.id.distance);
+	    dist.setText("Odleg³oœæ od punktu:");
 	    getLocationBtn = (Button)findViewById(R.id.getLocationBtn);
 	    getLocationBtn.setOnClickListener(new OnClickListener() {           
 	    	            @Override
@@ -109,103 +98,88 @@ public class MainActivity extends Activity {
 	    	            }
 	    	        });
 	    
-	   // addProximityAlert(51.8548, 19.4289);
+// LocationManager initialization
+	    lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+	    ll = new MyLocationListener();
+	    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);  
+	  
 	    
+		new JSONParse().execute();
 	}
 	
 	
-    private void saveProximityAlertPoint() {
+    	private void saveProximityAlertPoint() {
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (location==null) {
             Toast.makeText(this, "No last known location. Aborting...", Toast.LENGTH_LONG).show();
             return;
-        }
+        	}
             addProximityAlert(location.getLatitude(), location.getLongitude());
             saveCoordinatesInPreferences((float)location.getLatitude(), (float)location.getLongitude());
             Log.d("GPSStatus", String.valueOf(location.getLatitude())+" "+String.valueOf(location.getLongitude()));
-    }
-    
+    	}
+
+		private void saveCoordinatesInPreferences(float latitude, float longitude) {
+	         SharedPreferences prefs = this.getSharedPreferences(getClass().getSimpleName(), Context.MODE_PRIVATE);
+	         SharedPreferences.Editor prefsEditor = prefs.edit();
+	         prefsEditor.putFloat(POINT_LATITUDE_KEY, latitude);
+	         prefsEditor.putFloat(POINT_LONGITUDE_KEY, longitude);
+	         prefsEditor.commit();
+	     }
+    	
+		private Location retrievelocationFromPreferences() {
+	         SharedPreferences prefs = this.getSharedPreferences(getClass().getSimpleName(), Context.MODE_PRIVATE);
+	         Location location = new Location("POINT_LOCATION");
+	         location.setLatitude(prefs.getFloat(POINT_LATITUDE_KEY, 0));
+	         location.setLongitude(prefs.getFloat(POINT_LONGITUDE_KEY, 0));
+	         return location;
+	     }
+		
 		private void addProximityAlert(double latitude, double longitude) {
-	    	
-	    			Intent intent = new Intent(PROX_ALERT_INTENT);
-	    	        PendingIntent proximityIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
-	    		         
-	    	        lm.addProximityAlert(
-	    	        	latitude, // the latitude of the central point of the alert region
-	    	        	longitude, // the longitude of the central point of the alert region
-	    	            5000, // the radius of the central point of the alert region, in meters
-	    	            -1, // time for this proximity alert, in milliseconds, or -1 to indicate no expiration
-	    	            proximityIntent// will be used to generate an Intent to fire when entry to or exit from the alert region is detected
-	    	          );
-	    		         
-	    	        IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT); 
-	    		    registerReceiver(new ProximityIntentReceiver(), filter);
-	    		        
-	    		    }
-		
-/*		 private void populateCoordinatesFromLastKnownLocation() {
-			         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			Intent intent = new Intent(PROX_ALERT_INTENT);
+	        PendingIntent proximityIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
+		    Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		    lm.addProximityAlert(location.getLatitude(), location.getLongitude(), 1, 1000, proximityIntent);
+		    IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT); 
+		   	registerReceiver(new ProximityIntentReceiver(), filter);	        
+	    	}
 
-			         if (location!=null) {
-			             latitudeEditText.setText(nf.format(location.getLatitude()));
-			             longitudeEditText.setText(nf.format(location.getLongitude()));
-			         }
-			     }
-*/
-			     private void saveCoordinatesInPreferences(float latitude, float longitude) {
-			         SharedPreferences prefs = this.getSharedPreferences(getClass().getSimpleName(), Context.MODE_PRIVATE);
-			         SharedPreferences.Editor prefsEditor = prefs.edit();
-			         prefsEditor.putFloat(POINT_LATITUDE_KEY, latitude);
-			         prefsEditor.putFloat(POINT_LONGITUDE_KEY, longitude);
-			         prefsEditor.commit();
-			     }
 
-			     private Location retrievelocationFromPreferences() {
-			         SharedPreferences prefs = this.getSharedPreferences(getClass().getSimpleName(), Context.MODE_PRIVATE);
-			         Location location = new Location("POINT_LOCATION");
-			         location.setLatitude(prefs.getFloat(POINT_LATITUDE_KEY, 0));
-			         location.setLongitude(prefs.getFloat(POINT_LONGITUDE_KEY, 0));
-			         return location;
-			     }
 
 		
-		
-		public class MyLocationListener implements LocationListener {
-	        public void onLocationChanged(Location location) {
-			            Location pointLocation = retrievelocationFromPreferences();
+
+				
+	public class MyLocationListener implements LocationListener {
+			  
+	    public void onLocationChanged(Location location) {
+	        			Location pointLocation = retrievelocationFromPreferences();
 			            float distance = location.distanceTo(pointLocation);
-			            Toast.makeText(MainActivity.this, "Distance from Point:"+distance, Toast.LENGTH_LONG).show();
+			        	dist.setText("Odleg³oœæ od punktu: "+distFormat.format(distance)+"m");
+			            //Toast.makeText(MainActivity.this, "Distance from Point:"+distFormat.format(distance)+"m", Toast.LENGTH_SHORT).show();
 			            gps.setText("Szerokoœæ: "+ location.getLatitude() + " D³ugoœæ: " + location.getLongitude());
 			        }
-			        public void onStatusChanged(String s, int i, Bundle b) {           
+	    public void onStatusChanged(String s, int i, Bundle b) {           
 			        }
-			        public void onProviderDisabled(String s) {
+	    public void onProviderDisabled(String s) {
+			        	
 			        }
-			        public void onProviderEnabled(String s) {           
+	    public void onProviderEnabled(String s) {           
 			        }
-			    }
-
+	}
 		
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
+		
+		/*		 private void populateCoordinatesFromLastKnownLocation() {
+        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        if (location!=null) {
+            latitudeEditText.setText(nf.format(location.getLatitude()));
+            longitudeEditText.setText(nf.format(location.getLongitude()));
+        }
+    }
+*/
 	
-	@Override
-	public void onPause(){
-		super.onPause();
-		lm.removeUpdates(ll);
-	}
 	
-	@Override
-	public void onResume(){
-		super.onResume();
-		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll); 
-	}
-	
-	//Tworzenie procesu asynctask
+	//Tworzenie procesu AsyncTask
    public class JSONParse extends AsyncTask<String, String, JSONObject> {
 	     private ProgressDialog pDialog;
        @Override
@@ -284,31 +258,30 @@ public class MainActivity extends Activity {
        }
       }
    }   
-/*  private class MyLocationListener implements LocationListener 
-   {           
-       @Override
-       public void onLocationChanged(Location loc) {
-           if (loc != null) {
-
-               gps.setText("Szerokoœæ: "+ loc.getLatitude() + " D³ugoœæ: " + loc.getLongitude());
-           }
-       }       @Override
-               public void onProviderDisabled(String provider) {
-                       // TODO Auto-generated method stub
-                       
-               }
-
-       			@Override
-               public void onProviderEnabled(String provider) {
-                       // TODO Auto-generated method stub
-                       
-               }
-
-       			@Override
-               public void onStatusChanged(String provider, int status, Bundle extras) {
-                       // TODO Auto-generated method stub
-                       
-               }
-   }*/
+   
+   @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+	
+	@Override
+	public void onPause(){
+		super.onPause();
+		//lm.removeUpdates(ll);
+	}
+	
+	@Override
+	public void onStop(){
+		super.onStop();
+		lm.removeUpdates(ll);
+	}
+	
+	@Override
+	public void onResume(){
+		super.onResume();
+		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll); 
+	}
 
 }
