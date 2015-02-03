@@ -39,7 +39,7 @@ public class MainActivity extends Activity {
 	
 	public String savedName;
 
-	private TextView name, gender, adress, beer, shot, gps, dist;
+	private TextView name, gender, adress, beer, shot, gps, dist, jsonLoc;
 	private ListView list;
 	public Button btngetdata, getLocationBtn;
 	private ArrayList<HashMap<String, String>> clubList = new ArrayList<HashMap<String, String>>();
@@ -58,6 +58,8 @@ public class MainActivity extends Activity {
 	  public static final String TAG_SHOT = "shot";
 	  public static final String TAG_DESCRIPTION = "opis";
 	  public static final String TAG_LOGO = "logo";
+	  public static final String TAG_LATITUDE = "latitude";
+	  public static final String TAG_LONGITUDE = "longitude";
 	  
 	  private static final String GETTING_DATA = "Pobieranie danych...";
 	  private static final String PROX_ALERT_INTENT = "com.example.test.ProximityIntentReceiver";
@@ -70,6 +72,7 @@ public class MainActivity extends Activity {
 
 	  
 	  JSONArray jArray = null;
+	  JSONArray jArrayLoc = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +90,18 @@ public class MainActivity extends Activity {
 	    	  new JSONParse().execute();
 	      }
            });
+	    
+		JSONObject f = null;
+		try {
+			f = getLocFromJson(1);
+		} catch (JSONException e) {
+			 Log.e("JSON Parser", "Error parsing data " + e.toString());
+			e.printStackTrace();
+		}
+		
+	    jsonLoc = (TextView)findViewById(R.id.jsonloc);
+	    jsonLoc.setText(f.toString());
+	    
 	    gps = (TextView)findViewById(R.id.gps);
 	    dist = (TextView)findViewById(R.id.distance);
 	    dist.setText("Odleg³oœæ od punktu:");
@@ -105,8 +120,20 @@ public class MainActivity extends Activity {
 	  
 	    
 		new JSONParse().execute();
+
+
+		
 	}
 	
+	public JSONObject getLocFromJson(int id) throws JSONException{
+	JSONParser locJson = new JSONParser();
+	locJson.getJSONFromUrl(URL);
+	JSONObject locJsonObject = new JSONObject();
+	locJsonObject.getJSONArray(TAG_CLUBS).getJSONObject(id).get(TAG_LATITUDE);
+	return locJsonObject;
+	}
+
+
 	
     	private void saveProximityAlertPoint() {
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -137,9 +164,9 @@ public class MainActivity extends Activity {
 		
 		private void addProximityAlert(double latitude, double longitude) {
 			Intent intent = new Intent(PROX_ALERT_INTENT);
-	        PendingIntent proximityIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
+	        PendingIntent proximityIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		    Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		    lm.addProximityAlert(location.getLatitude(), location.getLongitude(), 1, 1000, proximityIntent);
+		    lm.addProximityAlert(location.getLatitude(), location.getLongitude(), 50, -1, proximityIntent);
 		    IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT); 
 		   	registerReceiver(new ProximityIntentReceiver(), filter);	        
 	    	}
@@ -208,6 +235,7 @@ public class MainActivity extends Activity {
        JSONObject json = jParser.getJSONFromUrl(URL);
        return json;
      }
+       
       @Override
         protected void onPostExecute(JSONObject json) {
         pDialog.dismiss();
@@ -231,6 +259,8 @@ public class MainActivity extends Activity {
            map.put(TAG_BEER, beer);
            map.put(TAG_SHOT, shot);
            map.put("Id", id);
+           //map.put("latitude", latitude);
+           //map.put("longitude", longitude);
            clubList.add(map);
            
            

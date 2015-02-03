@@ -23,12 +23,6 @@ public class ProximityIntentReceiver extends BroadcastReceiver {
         String key = LocationManager.KEY_PROXIMITY_ENTERING;
         Boolean entering = intent.getBooleanExtra(key, false);
 
-/*        if (entering) {
-            Log.d(getClass().getSimpleName(), "entering");
-        }
-        else {
-            Log.d(getClass().getSimpleName(), "exiting");
-        }*/
         if (entering) {
             Log.d("GPSStatus", "entering");
             Toast.makeText(context, "entering", Toast.LENGTH_SHORT).show();
