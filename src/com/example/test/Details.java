@@ -1,5 +1,8 @@
 package com.example.test;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,6 +26,25 @@ public class Details extends Activity {
 	public String savedId;
 	JSONArray jArray = null;
 	ImageView logo;
+	 public static final String TAG_CLUBS = "kluby";
+	  public static final String TAG_NAME = "name";
+	  public static final String TAG_GENDER = "gender";
+	  public static final String TAG_ADRESS = "adress";
+	  public static final String TAG_BEER = "beer";
+	  public static final String TAG_SHOT = "shot";
+	  public static final String TAG_DESCRIPTION = "opis";
+	  public static final String TAG_LOGO = "logo";
+	  public static final String TAG_LATITUDE = "latitude";
+	  public static final String TAG_LONGITUDE = "longitude";
+	  
+	  private static final String GETTING_DATA = "Pobieranie danych...";
+	  private static final String PROX_ALERT_INTENT = "com.example.test.ProximityIntentReceiver";
+	  
+	  private static final NumberFormat nf = new DecimalFormat("##.########");
+	  private static final NumberFormat distFormat = new DecimalFormat("##.##");
+	  private static final String POINT_LATITUDE_KEY = "POINT_LATITUDE_KEY";
+	  private static final String POINT_LONGITUDE_KEY = "POINT_LONGITUDE_KEY";
+	  public static final String URL = "http://cypo.esy.es/lodz.json";
 		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,9 +62,9 @@ public class Details extends Activity {
 			savedIdTV = (TextView)findViewById(R.id.savedId);
 			savedIdTV.setText(savedId);
 			
-
 	}
-
+	
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.

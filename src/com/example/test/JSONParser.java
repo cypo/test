@@ -32,10 +32,13 @@ public class JSONParser {
             is = httpEntity.getContent();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
+            Log.e("JSON", "Dupa");
         } catch (ClientProtocolException e) {
             e.printStackTrace();
+            Log.e("JSON", "Dupa");
         } catch (IOException e) {
             e.printStackTrace();
+            Log.e("JSON", "Dupa");
         }
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);

@@ -9,6 +9,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonArrayRequest;
+
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -69,8 +74,16 @@ public class MainActivity extends Activity {
 	  private static final String POINT_LATITUDE_KEY = "POINT_LATITUDE_KEY";
 	  private static final String POINT_LONGITUDE_KEY = "POINT_LONGITUDE_KEY";
 
-
-	  
+//VOLLEY/////////////////////////////////////////
+	  	private static String TAG = MainActivity.class.getSimpleName();
+	  	private Button btnMakeObjectRequest, btnMakeArrayRequest;
+	    // Progress dialog
+	    private ProgressDialog pDialog;
+	    private TextView txtResponse;
+	    // temporary string to show the parsed response
+	    private String jsonResponse;
+//////////////////////////////////////////////////	    
+	    
 	  JSONArray jArray = null;
 	  JSONArray jArrayLoc = null;
 
@@ -90,17 +103,10 @@ public class MainActivity extends Activity {
 	    	  new JSONParse().execute();
 	      }
            });
+	  
 	    
-		JSONObject f = null;
-		try {
-			f = getLocFromJson(1);
-		} catch (JSONException e) {
-			 Log.e("JSON Parser", "Error parsing data " + e.toString());
-			e.printStackTrace();
-		}
-		
-	    jsonLoc = (TextView)findViewById(R.id.jsonloc);
-	    jsonLoc.setText(f.toString());
+	    txtResponse = (TextView)findViewById(R.id.jsonLoc);
+	    
 	    
 	    gps = (TextView)findViewById(R.id.gps);
 	    dist = (TextView)findViewById(R.id.distance);
@@ -119,21 +125,80 @@ public class MainActivity extends Activity {
 	    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);  
 	  
 	    
-		new JSONParse().execute();
+		//new JSONParse().execute();
 
-
-		
-	}
 	
-	public JSONObject getLocFromJson(int id) throws JSONException{
-	JSONParser locJson = new JSONParser();
-	locJson.getJSONFromUrl(URL);
-	JSONObject locJsonObject = new JSONObject();
-	locJsonObject.getJSONArray(TAG_CLUBS).getJSONObject(id).get(TAG_LATITUDE);
-	return locJsonObject;
+	 /*   try{
+	    	JSONObject f = getLocFromJson(1);
+	    	//String loc = f.getString("latitude");
+	    	//jsonLoc = (TextView)findViewById(R.id.jsonloc);
+	    	//jsonLoc.setText(loc);
+	    	}
+	    catch(JSONException e){
+	    	e.printStackTrace();
+	    	}*/
+	    
+	makeJsonArrayRequest();
+}
+	
+	
+//VOLLEY//////////////////////////
+	private void makeJsonArrayRequest() {
+		 
+	 
+	    JsonArrayRequest req = new JsonArrayRequest(URL,
+	            new Response.Listener<JSONArray>() {
+	                @Override
+	                public void onResponse(JSONArray response) {
+	                    Log.d(TAG, response.toString());
+	 
+	                    try {
+	                        // Parsing json array response
+	                        // loop through each json object
+	                        jsonResponse = "";
+	                        //for (int i = 0; i < response.length(); i++) {
+	 
+	                            JSONObject loc = (JSONObject) response.get(1);
+	 
+	                            String latitude = loc.getString(TAG_LATITUDE);
+	                            String longitude = loc.getString(TAG_LONGITUDE);
+	                           	 
+	                            jsonResponse = latitude + "\n" + longitude + "\n\n";
+	                      //  }
+	 
+	                        txtResponse.setText(jsonResponse);
+	 
+	                    } catch (JSONException e) {
+	                        e.printStackTrace();
+	                        Toast.makeText(getApplicationContext(),
+	                                "Error: " + e.getMessage(),
+	                                Toast.LENGTH_LONG).show();
+	                    }
+	 	                  
+	                }
+	            }, new Response.ErrorListener() {
+	                @Override
+	                public void onErrorResponse(VolleyError error) {
+	                    VolleyLog.d(TAG, "Error: " + error.getMessage());
+	                    Toast.makeText(getApplicationContext(),
+	                            error.getMessage(), Toast.LENGTH_SHORT).show();
+	                    }
+	            });
+	 
+	    // Adding request to request queue
+	    Controller.getInstance().addToRequestQueue(req);
 	}
-
-
+//////////////////////////////////////////////////////////////////////
+	
+		
+/*		public JSONObject getLocFromJson(int id) throws JSONException{
+		JSONParser locJsonParser = new JSONParser();
+		JSONObject locJsonObject = locJsonParser.getJSONFromUrl(URL);
+		JSONArray locJsonArray = locJsonObject.getJSONArray(TAG_CLUBS);
+		locJsonObject = locJsonArray.getJSONObject(id);
+		return locJsonObject;
+		}*/
+	
 	
     	private void saveProximityAlertPoint() {
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -170,10 +235,6 @@ public class MainActivity extends Activity {
 		    IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT); 
 		   	registerReceiver(new ProximityIntentReceiver(), filter);	        
 	    	}
-
-
-
-		
 
 				
 	public class MyLocationListener implements LocationListener {
@@ -230,10 +291,10 @@ public class MainActivity extends Activity {
        //zwraca jsona przez klasê JSONParser
        @Override
        protected JSONObject doInBackground(String... args) {
-       JSONParser jParser = new JSONParser();
-       // Getting JSON from URL
-       JSONObject json = jParser.getJSONFromUrl(URL);
-       return json;
+           // Getting JSON from URL
+    	   JSONParser jParser = new JSONParser();
+    	   JSONObject json = jParser.getJSONFromUrl(URL);
+    	   return json;
      }
        
       @Override
@@ -242,6 +303,7 @@ public class MainActivity extends Activity {
         try {
            // Getting JSON Array from URL
            jArray = json.getJSONArray(TAG_CLUBS);
+        
            for(int i=0; i<jArray.length(); i++){
            JSONObject c = jArray.getJSONObject(i);
            // Storing  JSON item in a Variable

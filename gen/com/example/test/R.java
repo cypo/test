@@ -43,7 +43,7 @@ public final class R {
         public static final int gender=0x7f080009;
         public static final int getLocationBtn=0x7f080011;
         public static final int gps=0x7f08000d;
-        public static final int jsonloc=0x7f08000f;
+        public static final int jsonLoc=0x7f08000f;
         public static final int listView1=0x7f080012;
         public static final int logo=0x7f080000;
         public static final int name=0x7f080008;
