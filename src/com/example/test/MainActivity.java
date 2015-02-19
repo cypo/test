@@ -14,6 +14,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonArrayRequest;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -25,6 +26,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -84,7 +86,7 @@ public class MainActivity extends Activity {
 	    private String jsonResponse;
 //////////////////////////////////////////////////	    
 	    
-	  JSONArray jArray = null;
+	 // JSONArray jArray = null;
 	  JSONArray jArrayLoc = null;
 
 	@Override
@@ -125,20 +127,8 @@ public class MainActivity extends Activity {
 	    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);  
 	  
 	    
-		//new JSONParse().execute();
-
-	
-	 /*   try{
-	    	JSONObject f = getLocFromJson(1);
-	    	//String loc = f.getString("latitude");
-	    	//jsonLoc = (TextView)findViewById(R.id.jsonloc);
-	    	//jsonLoc.setText(loc);
-	    	}
-	    catch(JSONException e){
-	    	e.printStackTrace();
-	    	}*/
-	    
-	makeJsonArrayRequest();
+		new JSONParse().execute();
+	   	makeJsonArrayRequest();
 }
 	
 	
@@ -191,15 +181,6 @@ public class MainActivity extends Activity {
 //////////////////////////////////////////////////////////////////////
 	
 		
-/*		public JSONObject getLocFromJson(int id) throws JSONException{
-		JSONParser locJsonParser = new JSONParser();
-		JSONObject locJsonObject = locJsonParser.getJSONFromUrl(URL);
-		JSONArray locJsonArray = locJsonObject.getJSONArray(TAG_CLUBS);
-		locJsonObject = locJsonArray.getJSONObject(id);
-		return locJsonObject;
-		}*/
-	
-	
     	private void saveProximityAlertPoint() {
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (location==null) {
@@ -268,7 +249,7 @@ public class MainActivity extends Activity {
 	
 	
 	//Tworzenie procesu AsyncTask
-   public class JSONParse extends AsyncTask<String, String, JSONObject> {
+   public class JSONParse extends AsyncTask<String, String, JSONArray> {
 	     private ProgressDialog pDialog;
        @Override
          protected void onPreExecute() {
@@ -290,20 +271,19 @@ public class MainActivity extends Activity {
        
        //zwraca jsona przez klasê JSONParser
        @Override
-       protected JSONObject doInBackground(String... args) {
+       protected JSONArray doInBackground(String... args) {
            // Getting JSON from URL
     	   JSONParser jParser = new JSONParser();
-    	   JSONObject json = jParser.getJSONFromUrl(URL);
+    	   JSONArray json = jParser.getJSONFromUrl(URL);
     	   return json;
      }
-       
+       @TargetApi(Build.VERSION_CODES.KITKAT)
       @Override
-        protected void onPostExecute(JSONObject json) {
+        protected void onPostExecute(JSONArray json) {
         pDialog.dismiss();
-        try {
-           // Getting JSON Array from URL
-           jArray = json.getJSONArray(TAG_CLUBS);
         
+        try {
+           JSONArray jArray = json;
            for(int i=0; i<jArray.length(); i++){
            JSONObject c = jArray.getJSONObject(i);
            // Storing  JSON item in a Variable

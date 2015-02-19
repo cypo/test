@@ -2,21 +2,20 @@ package com.example.test;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.squareup.picasso.Picasso;
 
 
@@ -86,7 +85,7 @@ public class Details extends Activity {
 	
 
 	//Tworzenie procesu asynctask
-	   public class JSONParse extends AsyncTask<String, String, JSONObject> {
+	   public class JSONParse extends AsyncTask<String, String, JSONArray> {
 		   
 		     private ProgressDialog pDialog;
 	       @Override
@@ -102,19 +101,20 @@ public class Details extends Activity {
 	       
 	       //zwraca jsona przez klasê JSONParser
 	       @Override
-	       protected JSONObject doInBackground(String... args) {
+	       protected JSONArray doInBackground(String... args) {
 	       JSONParser jParser = new JSONParser();
 	       // Getting JSON from URL
-	       JSONObject json = jParser.getJSONFromUrl(MainActivity.URL);
+	       JSONArray json = jParser.getJSONFromUrl(MainActivity.URL);
 	       return json;
 	     }
-	      @Override
-	        protected void onPostExecute(JSONObject json) {
+	      @TargetApi(Build.VERSION_CODES.KITKAT)
+		@Override
+	        protected void onPostExecute(JSONArray json) {
 	        pDialog.dismiss();
 	        try {
 	           // Getting JSON Array from URL
 	
-	           jArray = json.getJSONArray(MainActivity.TAG_CLUBS);
+	           jArray = json;
 	           int savedIdInt = Integer.parseInt(savedId);
 	           JSONObject c = jArray.getJSONObject(savedIdInt-1);
 	           // Storing  JSON item in a Variable
