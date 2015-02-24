@@ -9,7 +9,7 @@
     <TextView 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="GPS: "/>
+        android:text="Aktualna lokalizacja: "/>
     
     <TextView 
         android:id="@+id/gps"
@@ -31,11 +31,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Odśwież" />
-    <Button 
-        android:id="@+id/getLocationBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Ustal punkt"/>
     
        <ListView
         android:id="@+id/listView1"

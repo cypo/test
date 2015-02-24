@@ -7,25 +7,39 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.example.test.MainActivity.JSONParse;
+import com.example.test.MainActivity.MyLocationListener;
 import com.squareup.picasso.Picasso;
 
 
 public class Details extends Activity {
-	public String jsonName, jsonGender, jsonAdress, jsonBeer, jsonShot, jsonLogo, jsonDescription;
-	private TextView name, gender, adress, beer, shot, description, savedIdTV;
+	public String jsonName, jsonGender, jsonAdress, jsonBeer, jsonShot, jsonLogo, jsonDescription, jsonLongitude, jsonLatitude;
+	private TextView name, gender, adress, beer, shot, description, savedIdTV, jsonLong, jsonLati, aaa, bbb;
+	private Button PAButton;
 	public String savedId;
 	JSONArray jArray = null;
 	ImageView logo;
-	 public static final String TAG_CLUBS = "kluby";
 	  public static final String TAG_NAME = "name";
 	  public static final String TAG_GENDER = "gender";
 	  public static final String TAG_ADRESS = "adress";
@@ -44,7 +58,16 @@ public class Details extends Activity {
 	  private static final String POINT_LATITUDE_KEY = "POINT_LATITUDE_KEY";
 	  private static final String POINT_LONGITUDE_KEY = "POINT_LONGITUDE_KEY";
 	  public static final String URL = "http://cypo.esy.es/lodz.json";
+	  
+	  double doubleLatitude;
+	  double doubleLongitude;
+	  
+	  
+	  private LocationManager lm;
+	  private LocationListener ll;
 		
+
+	  
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -54,15 +77,50 @@ public class Details extends Activity {
 				
 			Intent intent = getIntent();
 			savedId = intent.getStringExtra("id");
+			
+			
+
+			
+			PAButton = (Button)findViewById(R.id.PAButton);
+			PAButton.setOnClickListener(new View.OnClickListener() {
+			      @Override
+			      public void onClick(View view) {
+			    
+					
+			    	addProximityAlert(doubleLatitude, doubleLongitude);
+			      }
+		           });
 					
 			new JSONParse().execute();
-			
+/*			lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+			ll = x.new MyLocationListener();
+		    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);*/
+
+			   lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+			   ll = new MyLocationListener();
+			   lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);  
 			//niepotrzebne
-			savedIdTV = (TextView)findViewById(R.id.savedId);
-			savedIdTV.setText(savedId);
+/*			savedIdTV = (TextView)findViewById(R.id.savedId);
+			savedIdTV.setText(savedId);*/
 			
 	}
-	
+	public class MyLocationListener implements LocationListener {
+		  
+	    public void onLocationChanged(Location location) {
+	        			//Location pointLocation = retrievelocationFromPreferences();
+			            //float distance = location.distanceTo(pointLocation);
+			        	//dist.setText("Odleg³oœæ od punktu: "+distFormat.format(distance)+"m");
+			            //Toast.makeText(MainActivity.this, "Distance from Point:"+distFormat.format(distance)+"m", Toast.LENGTH_SHORT).show();
+			            //gps.setText("Szerokoœæ: "+ location.getLatitude() + " D³ugoœæ: " + location.getLongitude());
+			        }
+	    public void onStatusChanged(String s, int i, Bundle b) {           
+			        }
+	    public void onProviderDisabled(String s) {
+			        	
+			        }
+	    public void onProviderEnabled(String s) {           
+			        }
+	}
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -125,6 +183,8 @@ public class Details extends Activity {
 	           jsonShot = c.getString(MainActivity.TAG_SHOT);
 	           jsonDescription = c.getString(MainActivity.TAG_DESCRIPTION);
 	           jsonLogo = c.getString(MainActivity.TAG_LOGO);
+	           jsonLongitude = c.getString(MainActivity.TAG_LONGITUDE);
+	           jsonLatitude = c.getString(MainActivity.TAG_LATITUDE);
 	                          	         	           
 	           name = (TextView)findViewById(R.id.detailsName);
 	           gender = (TextView)findViewById(R.id.detailsGender);
@@ -132,6 +192,8 @@ public class Details extends Activity {
 	           beer = (TextView)findViewById(R.id.detailsBeer);
 	           shot = (TextView)findViewById(R.id.detailsShot);
 	           description = (TextView)findViewById(R.id.detailsDescription);
+	           jsonLati = (TextView)findViewById(R.id.jsonLati);
+	           jsonLong = (TextView)findViewById(R.id.jsonLong);
 	           
 	        		   
 	           name.setText(jsonName);
@@ -140,9 +202,14 @@ public class Details extends Activity {
 	           beer.setText(jsonBeer);
 	           shot.setText(jsonShot);
 	           description.setText(jsonDescription);
+	           jsonLati.setText(jsonLatitude);
+	           jsonLong.setText(jsonLongitude);
 	   	           
 				logo = (ImageView)findViewById(R.id.logo);
 				Picasso.with(getApplicationContext()).load(jsonLogo).into(logo);
+				
+				doubleLatitude = Double.parseDouble(jsonLatitude);
+				doubleLongitude = Double.parseDouble(jsonLongitude);
 	           
 	        	} 
 	        catch (JSONException e) {
@@ -152,4 +219,65 @@ public class Details extends Activity {
 	        
 	      }
 	    }   
+		//DO zautomatyzowania nadawania lokalizacji
+   	/*private void saveProximityAlertPoint() {
+   		
+       Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+       if (location==null) {
+           Toast.makeText(this, "No last known location. Aborting...", Toast.LENGTH_LONG).show();
+           return;
+       	}
+           addProximityAlert(location.getLatitude(), location.getLongitude());
+           saveCoordinatesInPreferences((float)location.getLatitude(), (float)location.getLongitude());
+           Log.d("GPSStatus", String.valueOf(location.getLatitude())+" "+String.valueOf(location.getLongitude()));
+   	}*/
+
+	   private void saveCoordinatesInPreferences(float latitude, float longitude) {
+	         SharedPreferences prefs = this.getSharedPreferences("com.example.test", Context.MODE_PRIVATE);
+	         SharedPreferences.Editor prefsEditor = prefs.edit();
+	         prefsEditor.putFloat(POINT_LATITUDE_KEY, latitude);
+	         prefsEditor.putFloat(POINT_LONGITUDE_KEY, longitude);
+	         prefsEditor.commit();
+	     }
+   	
+
+		
+		private void addProximityAlert(double latitude, double longitude) {
+			Intent intent = new Intent(PROX_ALERT_INTENT);
+	        PendingIntent proximityIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		    //Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		    
+		    lm.addProximityAlert(latitude, longitude, 50, -1, proximityIntent);
+		    float longFloat = (float)longitude;
+		    float latiFloat = (float)latitude;
+		    saveCoordinatesInPreferences(latiFloat, longFloat);
+		    
+		    //do wyrzucenia
+		    aaa = (TextView)findViewById(R.id.aaa);
+		    bbb = (TextView)findViewById(R.id.bbb);
+		    String aaaString = Double.toString(latitude);
+		    String bbbString = Double.toString(longitude);
+		    aaa.setText(aaaString);
+		    bbb.setText(bbbString);
+		    
+		    IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT); 
+		   	registerReceiver(new ProximityIntentReceiver(), filter);	        
+	    	}
+		@Override
+		public void onPause(){
+			super.onPause();
+			lm.removeUpdates(ll);
+		}
+		
+		@Override
+		public void onStop(){
+			super.onStop();
+			lm.removeUpdates(ll);
+		}
+		
+		@Override
+		public void onResume(){
+			super.onResume();
+			lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll); 
+		}
 	}

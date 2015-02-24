@@ -33,17 +33,17 @@ public class ProximityIntentReceiver extends BroadcastReceiver {
         }
         
 
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+/*        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         Intent intent2 = new Intent(context, ProximityAlert.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent2, PendingIntent.FLAG_ONE_SHOT, null); 
         //Intent.FLAG_ACTIVITY_NEW_TASK
         Notification notification = createNotification();
 
         notification.setLatestEventInfo(context, "Proximity Alert!", "Jesteœ blisko ustalonego punktu", pendingIntent);
-        notificationManager.notify(NOTIFICATION_ID, notification);
+        notificationManager.notify(NOTIFICATION_ID, notification);*/
     }
 
-    private Notification createNotification() {
+/*    private Notification createNotification() {
 
         Notification notification = new Notification();
         notification.icon = R.drawable.ic_launcher;
@@ -56,5 +56,5 @@ public class ProximityIntentReceiver extends BroadcastReceiver {
         notification.ledOnMS = 1500;
         notification.ledOffMS = 1500;
         return notification;
-    }
+    }*/
 }

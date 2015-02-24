@@ -58,5 +58,31 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         />
-
+                    <Button 
+                        android:id="@+id/PAButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/paButton"/>
+                    
+                    <TextView
+        android:id="@+id/jsonLong"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+                                    <TextView
+        android:id="@+id/jsonLati"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+                                                        <TextView
+        android:id="@+id/aaa"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+                                                                            <TextView
+        android:id="@+id/bbb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+                    
 </LinearLayout>

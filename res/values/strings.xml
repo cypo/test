@@ -9,5 +9,6 @@
     <string name="getting_data">Pobieranie danych</string>
     <string name="details">Szczegóły</string>
     <string name="title_activity_proximity_alert">ProximityAlert</string>
+    <string name="paButton">Informuj, gdy będę blisko</string>
 
 </resources>

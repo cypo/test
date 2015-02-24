@@ -46,18 +46,17 @@ public class MainActivity extends Activity {
 	
 	public String savedName;
 
-	private TextView name, gender, adress, beer, shot, gps, dist, jsonLoc;
+	private TextView gps, dist, jsonLoc;
 	private ListView list;
 	public Button btngetdata, getLocationBtn;
 	private ArrayList<HashMap<String, String>> clubList = new ArrayList<HashMap<String, String>>();
-	private LocationManager lm;
-	private LocationListener ll;
+	public LocationManager lm;
+	public LocationListener ll;
 
 	  //URL to get JSON Array
 	  public static final String URL = "http://cypo.esy.es/lodz.json"; //dodaæ wyj¹tek jeœli serwer nie odpowiada/nie istnieje
 
 		//JSON Node Names
-	  public static final String TAG_CLUBS = "kluby";
 	  public static final String TAG_NAME = "name";
 	  public static final String TAG_GENDER = "gender";
 	  public static final String TAG_ADRESS = "adress";
@@ -106,20 +105,12 @@ public class MainActivity extends Activity {
 	      }
            });
 	  
-	    
+	    //zmieñ nazwê pola, bo nie wiadomo ocb
 	    txtResponse = (TextView)findViewById(R.id.jsonLoc);
-	    
-	    
 	    gps = (TextView)findViewById(R.id.gps);
 	    dist = (TextView)findViewById(R.id.distance);
 	    dist.setText("Odleg³oœæ od punktu:");
-	    getLocationBtn = (Button)findViewById(R.id.getLocationBtn);
-	    getLocationBtn.setOnClickListener(new OnClickListener() {           
-	    	            @Override
-	    	            public void onClick(View v) {
-	    	                saveProximityAlertPoint();
-	    	            }
-	    	        });
+
 	    
 // LocationManager initialization
 	    lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
@@ -180,42 +171,13 @@ public class MainActivity extends Activity {
 	}
 //////////////////////////////////////////////////////////////////////
 	
-		
-    	private void saveProximityAlertPoint() {
-        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if (location==null) {
-            Toast.makeText(this, "No last known location. Aborting...", Toast.LENGTH_LONG).show();
-            return;
-        	}
-            addProximityAlert(location.getLatitude(), location.getLongitude());
-            saveCoordinatesInPreferences((float)location.getLatitude(), (float)location.getLongitude());
-            Log.d("GPSStatus", String.valueOf(location.getLatitude())+" "+String.valueOf(location.getLongitude()));
-    	}
-
-		private void saveCoordinatesInPreferences(float latitude, float longitude) {
-	         SharedPreferences prefs = this.getSharedPreferences(getClass().getSimpleName(), Context.MODE_PRIVATE);
-	         SharedPreferences.Editor prefsEditor = prefs.edit();
-	         prefsEditor.putFloat(POINT_LATITUDE_KEY, latitude);
-	         prefsEditor.putFloat(POINT_LONGITUDE_KEY, longitude);
-	         prefsEditor.commit();
-	     }
-    	
-		private Location retrievelocationFromPreferences() {
-	         SharedPreferences prefs = this.getSharedPreferences(getClass().getSimpleName(), Context.MODE_PRIVATE);
-	         Location location = new Location("POINT_LOCATION");
-	         location.setLatitude(prefs.getFloat(POINT_LATITUDE_KEY, 0));
-	         location.setLongitude(prefs.getFloat(POINT_LONGITUDE_KEY, 0));
-	         return location;
-	     }
-		
-		private void addProximityAlert(double latitude, double longitude) {
-			Intent intent = new Intent(PROX_ALERT_INTENT);
-	        PendingIntent proximityIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		    Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		    lm.addProximityAlert(location.getLatitude(), location.getLongitude(), 50, -1, proximityIntent);
-		    IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT); 
-		   	registerReceiver(new ProximityIntentReceiver(), filter);	        
-	    	}
+	private Location retrievelocationFromPreferences() {
+        SharedPreferences prefs = this.getSharedPreferences("com.example.test", Context.MODE_PRIVATE);
+        Location location = new Location("POINT_LOCATION");
+        location.setLatitude(prefs.getFloat(POINT_LATITUDE_KEY, 0));
+        location.setLongitude(prefs.getFloat(POINT_LONGITUDE_KEY, 0));
+        return location;
+    }
 
 				
 	public class MyLocationListener implements LocationListener {
@@ -235,22 +197,12 @@ public class MainActivity extends Activity {
 	    public void onProviderEnabled(String s) {           
 			        }
 	}
-		
-		
-		/*		 private void populateCoordinatesFromLastKnownLocation() {
-        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-        if (location!=null) {
-            latitudeEditText.setText(nf.format(location.getLatitude()));
-            longitudeEditText.setText(nf.format(location.getLongitude()));
-        }
-    }
-*/
 	
 	
 	//Tworzenie procesu AsyncTask
    public class JSONParse extends AsyncTask<String, String, JSONArray> {
 	     private ProgressDialog pDialog;
+	     private TextView name, gender, adress, beer, shot;
        @Override
          protected void onPreExecute() {
              super.onPreExecute();
@@ -341,7 +293,7 @@ public class MainActivity extends Activity {
 	@Override
 	public void onPause(){
 		super.onPause();
-		//lm.removeUpdates(ll);
+		lm.removeUpdates(ll);
 	}
 	
 	@Override
