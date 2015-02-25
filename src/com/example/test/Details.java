@@ -19,27 +19,27 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.example.test.MainActivity.JSONParse;
-import com.example.test.MainActivity.MyLocationListener;
 import com.squareup.picasso.Picasso;
-
 
 public class Details extends Activity {
 	public String jsonName, jsonGender, jsonAdress, jsonBeer, jsonShot, jsonLogo, jsonDescription, jsonLongitude, jsonLatitude;
 	private TextView name, gender, adress, beer, shot, description, savedIdTV, jsonLong, jsonLati, aaa, bbb;
 	private Button PAButton;
 	public String savedId;
-	JSONArray jArray = null;
-	ImageView logo;
+	private JSONArray jArray = null;
+	private ImageView logo;
+	private double doubleLatitude;
+	private double doubleLongitude;
+	  	  
+	private LocationManager lm;
+	private LocationListener ll;
+	  
 	  public static final String TAG_NAME = "name";
 	  public static final String TAG_GENDER = "gender";
 	  public static final String TAG_ADRESS = "adress";
@@ -58,14 +58,6 @@ public class Details extends Activity {
 	  private static final String POINT_LATITUDE_KEY = "POINT_LATITUDE_KEY";
 	  private static final String POINT_LONGITUDE_KEY = "POINT_LONGITUDE_KEY";
 	  public static final String URL = "http://cypo.esy.es/lodz.json";
-	  
-	  double doubleLatitude;
-	  double doubleLongitude;
-	  
-	  
-	  private LocationManager lm;
-	  private LocationListener ll;
-		
 
 	  
 	@Override
@@ -75,50 +67,40 @@ public class Details extends Activity {
 		getActionBar().setTitle(R.string.details);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 				
-			Intent intent = getIntent();
-			savedId = intent.getStringExtra("id");
-			
-			
-
-			
 			PAButton = (Button)findViewById(R.id.PAButton);
 			PAButton.setOnClickListener(new View.OnClickListener() {
 			      @Override
 			      public void onClick(View view) {
-			    
-					
 			    	addProximityAlert(doubleLatitude, doubleLongitude);
 			      }
 		           });
 					
-			new JSONParse().execute();
-/*			lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-			ll = x.new MyLocationListener();
-		    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);*/
-
-			   lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-			   ll = new MyLocationListener();
-			   lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);  
-			//niepotrzebne
-/*			savedIdTV = (TextView)findViewById(R.id.savedId);
-			savedIdTV.setText(savedId);*/
+			//zapisywanie ID do savedId (wykorzystane przy parsowaniu)
+			Intent intent = getIntent();
+			savedId = intent.getStringExtra("id");
+			
+			//uruchomienie gps
+			lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+			ll = new MyLocationListener();
+			lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);  
+			   
+			//wczytanie listView
+			   new JSONParse().execute();
 			
 	}
 	public class MyLocationListener implements LocationListener {
 		  
-	    public void onLocationChanged(Location location) {
-	        			//Location pointLocation = retrievelocationFromPreferences();
-			            //float distance = location.distanceTo(pointLocation);
-			        	//dist.setText("Odleg³oœæ od punktu: "+distFormat.format(distance)+"m");
-			            //Toast.makeText(MainActivity.this, "Distance from Point:"+distFormat.format(distance)+"m", Toast.LENGTH_SHORT).show();
-			            //gps.setText("Szerokoœæ: "+ location.getLatitude() + " D³ugoœæ: " + location.getLongitude());
+	    @Override
+		public void onLocationChanged(Location location) {
 			        }
-	    public void onStatusChanged(String s, int i, Bundle b) {           
+	    @Override
+		public void onStatusChanged(String s, int i, Bundle b) {           
 			        }
-	    public void onProviderDisabled(String s) {
-			        	
+	    @Override
+		public void onProviderDisabled(String s) {
 			        }
-	    public void onProviderEnabled(String s) {           
+	    @Override
+		public void onProviderEnabled(String s) {           
 			        }
 	}
 	
@@ -149,7 +131,6 @@ public class Details extends Activity {
 	       @Override
 	         protected void onPreExecute() {
 	             super.onPreExecute();
-	             //definiowanie okna dialogowego ³adowania
 	             pDialog = new ProgressDialog(Details.this);
 	             pDialog.setMessage("Pobieranie danych");
 	             pDialog.setIndeterminate(false);
@@ -165,13 +146,13 @@ public class Details extends Activity {
 	       JSONArray json = jParser.getJSONFromUrl(MainActivity.URL);
 	       return json;
 	     }
+	       //wyci¹ga z jsona wszystkie pola i ustawia je pod textView
 	      @TargetApi(Build.VERSION_CODES.KITKAT)
 		@Override
 	        protected void onPostExecute(JSONArray json) {
 	        pDialog.dismiss();
 	        try {
 	           // Getting JSON Array from URL
-	
 	           jArray = json;
 	           int savedIdInt = Integer.parseInt(savedId);
 	           JSONObject c = jArray.getJSONObject(savedIdInt-1);
@@ -192,33 +173,33 @@ public class Details extends Activity {
 	           beer = (TextView)findViewById(R.id.detailsBeer);
 	           shot = (TextView)findViewById(R.id.detailsShot);
 	           description = (TextView)findViewById(R.id.detailsDescription);
+	           //docelowo do wyjebki
 	           jsonLati = (TextView)findViewById(R.id.jsonLati);
 	           jsonLong = (TextView)findViewById(R.id.jsonLong);
-	           
-	        		   
+	           	   
 	           name.setText(jsonName);
 	           gender.setText(jsonGender);
 	           adress.setText(jsonAdress);
 	           beer.setText(jsonBeer);
 	           shot.setText(jsonShot);
 	           description.setText(jsonDescription);
+	           //dc do wyjebki
 	           jsonLati.setText(jsonLatitude);
 	           jsonLong.setText(jsonLongitude);
 	   	           
-				logo = (ImageView)findViewById(R.id.logo);
-				Picasso.with(getApplicationContext()).load(jsonLogo).into(logo);
+	           logo = (ImageView)findViewById(R.id.logo);
+	           Picasso.with(getApplicationContext()).load(jsonLogo).into(logo);
 				
-				doubleLatitude = Double.parseDouble(jsonLatitude);
-				doubleLongitude = Double.parseDouble(jsonLongitude);
+	           doubleLatitude = Double.parseDouble(jsonLatitude);
+	           doubleLongitude = Double.parseDouble(jsonLongitude);
 	           
 	        	} 
 	        catch (JSONException e) {
 	         e.printStackTrace();
 	       }
-
-	        
 	      }
 	    }   
+	   
 		//DO zautomatyzowania nadawania lokalizacji
    	/*private void saveProximityAlertPoint() {
    		
@@ -240,8 +221,6 @@ public class Details extends Activity {
 	         prefsEditor.commit();
 	     }
    	
-
-		
 		private void addProximityAlert(double latitude, double longitude) {
 			Intent intent = new Intent(PROX_ALERT_INTENT);
 	        PendingIntent proximityIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -260,6 +239,7 @@ public class Details extends Activity {
 		    aaa.setText(aaaString);
 		    bbb.setText(bbbString);
 		    
+		    //co to?
 		    IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT); 
 		   	registerReceiver(new ProximityIntentReceiver(), filter);	        
 	    	}

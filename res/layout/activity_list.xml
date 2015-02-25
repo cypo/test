@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
      <LinearLayout 
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
             <TextView 
@@ -15,46 +15,102 @@
         android:text="Name"
         />
          </LinearLayout>
-    <LinearLayout 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        >
-    <LinearLayout 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
 
-    <TextView 
-        android:id="@+id/gender"
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginRight="15dp"
+        android:orientation="horizontal" >
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="gender"
-        />
-    <TextView 
-        android:id="@+id/adress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="adress"
-        />
-    </LinearLayout>
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical" >
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingLeft="150dp" >
+            android:orientation="horizontal" >
 
-    <TextView 
-        android:id="@+id/beer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="B"/>
-        <TextView 
-        android:id="@+id/shot"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="S"/>
+            <ImageView
+                android:id="@+id/musicImg"
+                android:layout_width="17dp"
+                android:layout_height="17dp"
+                android:src="@drawable/music" />
+
+            <TextView
+                android:id="@+id/gender"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="gender" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/pinImg"
+                android:layout_width="17dp"
+                android:layout_height="17dp"
+                android:src="@drawable/pin" />
+
+            <TextView
+                android:id="@+id/adress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="adress" />
         </LinearLayout>
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/beerImg"
+                android:layout_width="17dp"
+                android:layout_height="17dp"
+                android:src="@drawable/beer" />
+
+            <TextView
+                android:id="@+id/beer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="B" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/shotImg"
+                android:layout_width="17dp"
+                android:layout_height="17dp"
+                android:src="@drawable/shot" />
+
+            <TextView
+                android:id="@+id/shot"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="S" />
+        </LinearLayout>
+    </LinearLayout>
+
+    </RelativeLayout>
 </LinearLayout>

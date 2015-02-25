@@ -9,18 +9,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.JsonArrayRequest;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
@@ -28,25 +21,20 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
-
-
 
 public class MainActivity extends Activity {
 	
 	public String savedName;
 
-	private TextView gps, dist, jsonLoc;
+	private TextView gps, dist;
 	private ListView list;
 	public Button btngetdata, getLocationBtn;
 	private ArrayList<HashMap<String, String>> clubList = new ArrayList<HashMap<String, String>>();
@@ -105,11 +93,9 @@ public class MainActivity extends Activity {
 	      }
            });
 	  
-	    //zmieñ nazwê pola, bo nie wiadomo ocb
-	    txtResponse = (TextView)findViewById(R.id.jsonLoc);
 	    gps = (TextView)findViewById(R.id.gps);
 	    dist = (TextView)findViewById(R.id.distance);
-	    dist.setText("Odleg³oœæ od punktu:");
+	    dist.setText("Odleg³oœæ od wybranego punktu:");
 
 	    
 // LocationManager initialization
@@ -119,12 +105,12 @@ public class MainActivity extends Activity {
 	  
 	    
 		new JSONParse().execute();
-	   	makeJsonArrayRequest();
+	   //	makeJsonArrayRequest();
 }
 	
 	
 //VOLLEY//////////////////////////
-	private void makeJsonArrayRequest() {
+	/*private void makeJsonArrayRequest() {
 		 
 	 
 	    JsonArrayRequest req = new JsonArrayRequest(URL,
@@ -168,7 +154,7 @@ public class MainActivity extends Activity {
 	 
 	    // Adding request to request queue
 	    Controller.getInstance().addToRequestQueue(req);
-	}
+	}*/
 //////////////////////////////////////////////////////////////////////
 	
 	private Location retrievelocationFromPreferences() {
@@ -182,19 +168,23 @@ public class MainActivity extends Activity {
 				
 	public class MyLocationListener implements LocationListener {
 			  
-	    public void onLocationChanged(Location location) {
+	    @Override
+		public void onLocationChanged(Location location) {
 	        			Location pointLocation = retrievelocationFromPreferences();
 			            float distance = location.distanceTo(pointLocation);
 			        	dist.setText("Odleg³oœæ od punktu: "+distFormat.format(distance)+"m");
 			            //Toast.makeText(MainActivity.this, "Distance from Point:"+distFormat.format(distance)+"m", Toast.LENGTH_SHORT).show();
 			            gps.setText("Szerokoœæ: "+ location.getLatitude() + " D³ugoœæ: " + location.getLongitude());
 			        }
-	    public void onStatusChanged(String s, int i, Bundle b) {           
+	    @Override
+		public void onStatusChanged(String s, int i, Bundle b) {           
 			        }
-	    public void onProviderDisabled(String s) {
+	    @Override
+		public void onProviderDisabled(String s) {
 			        	
 			        }
-	    public void onProviderEnabled(String s) {           
+	    @Override
+		public void onProviderEnabled(String s) {           
 			        }
 	}
 	
@@ -264,7 +254,8 @@ public class MainActivity extends Activity {
         		   				clubList,
         		   				R.layout.activity_list,
         		   				new String[] { TAG_NAME, TAG_GENDER, TAG_ADRESS, TAG_BEER, TAG_SHOT }, 
-        		   				new int[] {	R.id.name,R.id.gender, R.id.adress, R.id.beer, R.id.shot });
+        		   				new int[] {	R.id.name,R.id.gender,
+        		   						R.id.adress, R.id.beer, R.id.shot });
            
            list.setAdapter(adapter);
            
