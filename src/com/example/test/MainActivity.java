@@ -16,6 +16,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -204,17 +205,18 @@ public class MainActivity extends Activity {
 			        }
 	    @Override
 		public void onProviderEnabled(String s) {           
-            Location longitude = null;
-	    	Location latitude = null;
+	    	
+	    	// TU JEST LIPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+/*            Location loc = lm.getLastKnownLocation(LOCATION_SERVICE);
 	    	longitude.getLongitude();
 	    	latitude.getLatitude();
-	    	String longStr = longitude.toString();
-	    	String latiStr = latitude.toString();
-	    	float longFloat = Float.parseFloat(longStr);
-	    	float latiFloat = Float.parseFloat(latiStr);
+	    	double longD = loc.getLongitude();
+	    	double latiD = loc.getLatitude();
+	    	float longFloat = (float)longD;
+	    	float latiFloat = (float)latiD;
 
 	    	
-	    	saveCoordinatesInPreferences(latiFloat, longFloat);
+	    	saveCoordinatesInPreferences(latiFloat, longFloat);*/
 			        }
 	    
 	}
@@ -235,6 +237,7 @@ public class MainActivity extends Activity {
              adress = (TextView)findViewById(R.id.adress);
              beer = (TextView)findViewById(R.id.beer);
              shot = (TextView)findViewById(R.id.shot);
+             robocze = (TextView)findViewById(R.id.robocze);
               
              //definiowanie okna dialogowego ³adowania
              pDialog = new ProgressDialog(MainActivity.this);
@@ -275,10 +278,13 @@ public class MainActivity extends Activity {
            double longDouble = Double.parseDouble(longitude);
            float result[] = new float[1];
          
-           Location location = retrievelocationFromPreferences("POINT_LATITUDE_KEYQ", "POINT_LONGITUDE_KEYQ");
+           //Location location = retrievelocationFromPreferences("POINT_LATITUDE_KEYQ", "POINT_LONGITUDE_KEYQ");
+
+           Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
            //Location distance = null;
            if(location!=null){
         	   Location.distanceBetween(location.getLatitude(), location.getLongitude(), latiDouble, longDouble, result);
+        	   //Location.distanceBetween(51.780177, 19.451372, 51.773145, 19.467043, result); <--- works!
         	   //Location.distanceBetween(19.454546, 51.774181, 19.454596, 51.774130, result);
            }
            String resultStr = Float.toString(result[0]);
@@ -303,9 +309,9 @@ public class MainActivity extends Activity {
         		   				MainActivity.this, 
         		   				clubList,
         		   				R.layout.activity_list,
-        		   				new String[] { TAG_NAME, TAG_GENDER, TAG_ADRESS, TAG_BEER, TAG_SHOT }, 
+        		   				new String[] { TAG_NAME, TAG_GENDER, TAG_ADRESS, TAG_BEER, TAG_SHOT, TAG_DISTANCE }, 
         		   				new int[] {	R.id.name,R.id.gender,
-        		   						R.id.adress, R.id.beer, R.id.shot });
+        		   						R.id.adress, R.id.beer, R.id.shot, R.id.robocze });
            
            list.setAdapter(adapter);
            
@@ -329,8 +335,8 @@ public class MainActivity extends Activity {
 				    {
 				       
 						//return a.distance.compareTo(b.distance);
-					 //return Float.compare(Float.parseFloat(b.get(TAG_DISTANCE)), Float.parseFloat(a.get(TAG_DISTANCE)));
-				    	return b.get(TAG_DISTANCE).compareTo(a.get(TAG_DISTANCE));
+					 return Float.compare(Float.parseFloat(a.get(TAG_DISTANCE)), Float.parseFloat(b.get(TAG_DISTANCE)));
+				    	//return b.get(TAG_DISTANCE).compareTo(a.get(TAG_DISTANCE));
 				    }
 				});
         
