@@ -27,6 +27,14 @@
         android:layout_height="wrap_content"
         android:text="Odśwież" />
     
+        <Button
+        android:id="@+id/dataSort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="sortuj" />
+        
+
+        
        <ListView
         android:id="@+id/listView1"
         android:layout_width="wrap_content"

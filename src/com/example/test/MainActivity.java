@@ -3,8 +3,9 @@ package com.example.test;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,12 +32,12 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-	
+
 	public String savedName;
 
-	private TextView gps, dist;
+	private TextView gps, dist, robocze;
 	private ListView list;
-	public Button btngetdata, getLocationBtn;
+	public Button btngetdata, getLocationBtn, sortBtn;
 	private ArrayList<HashMap<String, String>> clubList = new ArrayList<HashMap<String, String>>();
 	public LocationManager lm;
 	public LocationListener ll;
@@ -54,6 +55,7 @@ public class MainActivity extends Activity {
 	  public static final String TAG_LOGO = "logo";
 	  public static final String TAG_LATITUDE = "latitude";
 	  public static final String TAG_LONGITUDE = "longitude";
+	  public static final String TAG_DISTANCE = "distance";
 	  
 	  private static final String GETTING_DATA = "Pobieranie danych...";
 	  private static final String PROX_ALERT_INTENT = "com.example.test.ProximityIntentReceiver";
@@ -76,6 +78,8 @@ public class MainActivity extends Activity {
 	 // JSONArray jArray = null;
 	  JSONArray jArrayLoc = null;
 
+	  	
+	  
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -88,15 +92,26 @@ public class MainActivity extends Activity {
 	    btngetdata.setOnClickListener(new View.OnClickListener() {
 	      @Override
 	      public void onClick(View view) {
-	    	  clubList.clear();
-	    	  new JSONParse().execute();
+	    	  /*clubList.clear();
+	    	  new JSONParse().execute();*/
+	    		
 	      }
            });
 	  
 	    gps = (TextView)findViewById(R.id.gps);
 	    dist = (TextView)findViewById(R.id.distance);
-	    dist.setText("Odleg³oœæ od wybranego punktu:");
-
+	    //dist.setText("Odleg³oœæ od wybranego punktu:");
+	    
+	   /* sortBtn = (Button)findViewById(R.id.dataSort);
+	    sortBtn.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				sortuj();
+				
+			}
+		});
+*/
 	    
 // LocationManager initialization
 	    lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
@@ -106,9 +121,11 @@ public class MainActivity extends Activity {
 	    
 		new JSONParse().execute();
 	   //	makeJsonArrayRequest();
+		
+		
 }
 	
-	
+
 //VOLLEY//////////////////////////
 	/*private void makeJsonArrayRequest() {
 		 
@@ -157,24 +174,26 @@ public class MainActivity extends Activity {
 	}*/
 //////////////////////////////////////////////////////////////////////
 	
-	private Location retrievelocationFromPreferences() {
+	private Location retrievelocationFromPreferences(String key1, String key2) {
         SharedPreferences prefs = this.getSharedPreferences("com.example.test", Context.MODE_PRIVATE);
         Location location = new Location("POINT_LOCATION");
-        location.setLatitude(prefs.getFloat(POINT_LATITUDE_KEY, 0));
-        location.setLongitude(prefs.getFloat(POINT_LONGITUDE_KEY, 0));
+        location.setLatitude(prefs.getFloat(key1, 0));
+        location.setLongitude(prefs.getFloat(key2, 0));
         return location;
     }
 
 				
 	public class MyLocationListener implements LocationListener {
-			  
+		
 	    @Override
 		public void onLocationChanged(Location location) {
-	        			Location pointLocation = retrievelocationFromPreferences();
+	        			Location pointLocation = retrievelocationFromPreferences(POINT_LATITUDE_KEY, POINT_LONGITUDE_KEY);
 			            float distance = location.distanceTo(pointLocation);
-			        	dist.setText("Odleg³oœæ od punktu: "+distFormat.format(distance)+"m");
+			        	//dist.setText("Odleg³oœæ od punktu: "+distFormat.format(distance)+"m");
 			            //Toast.makeText(MainActivity.this, "Distance from Point:"+distFormat.format(distance)+"m", Toast.LENGTH_SHORT).show();
 			            gps.setText("Szerokoœæ: "+ location.getLatitude() + " D³ugoœæ: " + location.getLongitude());
+			           
+
 			        }
 	    @Override
 		public void onStatusChanged(String s, int i, Bundle b) {           
@@ -185,14 +204,28 @@ public class MainActivity extends Activity {
 			        }
 	    @Override
 		public void onProviderEnabled(String s) {           
+            Location longitude = null;
+	    	Location latitude = null;
+	    	longitude.getLongitude();
+	    	latitude.getLatitude();
+	    	String longStr = longitude.toString();
+	    	String latiStr = latitude.toString();
+	    	float longFloat = Float.parseFloat(longStr);
+	    	float latiFloat = Float.parseFloat(latiStr);
+
+	    	
+	    	saveCoordinatesInPreferences(latiFloat, longFloat);
 			        }
+	    
 	}
 	
 	
 	//Tworzenie procesu AsyncTask
    public class JSONParse extends AsyncTask<String, String, JSONArray> {
+		public float distance;
 	     private ProgressDialog pDialog;
 	     private TextView name, gender, adress, beer, shot;
+	 
        @Override
          protected void onPreExecute() {
              super.onPreExecute();
@@ -235,6 +268,21 @@ public class MainActivity extends Activity {
            String adress = c.getString(TAG_ADRESS);
            String beer = c.getString(TAG_BEER);
            String shot = c.getString(TAG_SHOT);
+           String latitude = c.getString(TAG_LATITUDE);
+           String longitude = c.getString(TAG_LONGITUDE);
+           
+           double latiDouble = Double.parseDouble(latitude);
+           double longDouble = Double.parseDouble(longitude);
+           float result[] = new float[1];
+         
+           Location location = retrievelocationFromPreferences("POINT_LATITUDE_KEYQ", "POINT_LONGITUDE_KEYQ");
+           //Location distance = null;
+           if(location!=null){
+        	   Location.distanceBetween(location.getLatitude(), location.getLongitude(), latiDouble, longDouble, result);
+        	   //Location.distanceBetween(19.454546, 51.774181, 19.454596, 51.774130, result);
+           }
+           String resultStr = Float.toString(result[0]);
+           dist.setText(resultStr);
            // Adding value HashMap key => value
            HashMap<String, String> map = new HashMap<String, String>();
            map.put(TAG_NAME, name);
@@ -243,9 +291,11 @@ public class MainActivity extends Activity {
            map.put(TAG_BEER, beer);
            map.put(TAG_SHOT, shot);
            map.put("Id", id);
+           map.put(TAG_DISTANCE, resultStr);
            //map.put("latitude", latitude);
            //map.put("longitude", longitude);
            clubList.add(map);
+           
            
            
            list=(ListView)findViewById(R.id.listView1);
@@ -267,11 +317,25 @@ public class MainActivity extends Activity {
                 	  startActivity(intent);
                    }
                });
+          
            }
        } catch (JSONException e) {
          e.printStackTrace();
        }
+        Collections.sort(clubList, new Comparator<HashMap<String, String>>()
+				{
+				    @Override
+				    public int compare(HashMap<String, String> a, HashMap<String, String> b)
+				    {
+				       
+						//return a.distance.compareTo(b.distance);
+					 //return Float.compare(Float.parseFloat(b.get(TAG_DISTANCE)), Float.parseFloat(a.get(TAG_DISTANCE)));
+				    	return b.get(TAG_DISTANCE).compareTo(a.get(TAG_DISTANCE));
+				    }
+				});
+        
       }
+
    }   
    
    @Override
@@ -298,5 +362,15 @@ public class MainActivity extends Activity {
 		super.onResume();
 		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll); 
 	}
-
+	
+   	public void sortuj(){
+ 		
+ 		}
+	   private void saveCoordinatesInPreferences(float latitudeQ, float longitudeQ) {
+	         SharedPreferences prefs = this.getSharedPreferences("com.example.test", Context.MODE_PRIVATE);
+	         SharedPreferences.Editor prefsEditor = prefs.edit();
+	         prefsEditor.putFloat("POINT_LATITUDE_KEYQ", latitudeQ);
+	         prefsEditor.putFloat("POINT_LONGITUDE_KEYQ", longitudeQ);
+	         prefsEditor.commit();
+	     }
 }
