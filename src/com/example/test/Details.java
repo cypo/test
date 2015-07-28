@@ -1,10 +1,9 @@
 package com.example.test;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -25,39 +24,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.squareup.picasso.Picasso;
 
 public class Details extends Activity {
 	public String jsonName, jsonGender, jsonAdress, jsonBeer, jsonShot, jsonLogo, jsonDescription, jsonLongitude, jsonLatitude;
-	private TextView name, gender, adress, beer, shot, description, savedIdTV, jsonLong, jsonLati, aaa, bbb;
+	private TextView name, gender, adress, beer, shot, description, jsonLong, jsonLati, aaa, bbb;
 	private Button PAButton;
 	public String savedId;
 	private JSONArray jArray = null;
 	private ImageView logo;
 	private double doubleLatitude;
 	private double doubleLongitude;
-	  	  
 	private LocationManager lm;
 	private LocationListener ll;
-	  
-	  public static final String TAG_NAME = "name";
-	  public static final String TAG_GENDER = "gender";
-	  public static final String TAG_ADRESS = "adress";
-	  public static final String TAG_BEER = "beer";
-	  public static final String TAG_SHOT = "shot";
-	  public static final String TAG_DESCRIPTION = "opis";
-	  public static final String TAG_LOGO = "logo";
-	  public static final String TAG_LATITUDE = "latitude";
-	  public static final String TAG_LONGITUDE = "longitude";
-	  
-	  private static final String GETTING_DATA = "Pobieranie danych...";
-	  private static final String PROX_ALERT_INTENT = "com.example.test.ProximityIntentReceiver";
-	  
-	  private static final NumberFormat nf = new DecimalFormat("##.########");
-	  private static final NumberFormat distFormat = new DecimalFormat("##.##");
-	  private static final String POINT_LATITUDE_KEY = "POINT_LATITUDE_KEY";
-	  private static final String POINT_LONGITUDE_KEY = "POINT_LONGITUDE_KEY";
-	  public static final String URL = "http://cypo.esy.es/lodz.json";
+	private static final String PROX_ALERT_INTENT = "com.example.test.ProximityIntentReceiver";
 
 	  
 	@Override
@@ -216,8 +197,8 @@ public class Details extends Activity {
 	   private void saveCoordinatesInPreferences(float latitude, float longitude) {
 	         SharedPreferences prefs = this.getSharedPreferences("com.example.test", Context.MODE_PRIVATE);
 	         SharedPreferences.Editor prefsEditor = prefs.edit();
-	         prefsEditor.putFloat(POINT_LATITUDE_KEY, latitude);
-	         prefsEditor.putFloat(POINT_LONGITUDE_KEY, longitude);
+	         prefsEditor.putFloat("POINT_LATITUDE_KEY", latitude);
+	         prefsEditor.putFloat("POINT_LONGITUDE_KEY", longitude);
 	         prefsEditor.commit();
 	     }
    	

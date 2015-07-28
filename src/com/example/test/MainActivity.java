@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,19 +35,24 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
-	public String savedName;
-
+	private String savedName;
 	private TextView gps, dist, robocze;
 	private ListView list;
-	public Button btngetdata, getLocationBtn, sortBtn;
+	private Button btngetdata, getLocationBtn;
 	private ArrayList<HashMap<String, String>> clubList = new ArrayList<HashMap<String, String>>();
-	public LocationManager lm;
-	public LocationListener ll;
-
-	  //URL to get JSON Array
+	private LocationManager lm;
+	private LocationListener ll;
+	private static String TAG = MainActivity.class.getSimpleName();
+	private Button btnMakeObjectRequest, btnMakeArrayRequest;
+	// Progress dialog
+	private ProgressDialog pDialog;
+	private TextView txtResponse;
+	// temporary string to show the parsed response
+	private String jsonResponse;
+	
+	//URL to get JSON Array
 	  public static final String URL = "http://cypo.esy.es/demo.php"; //dodaæ wyj¹tek jeœli serwer nie odpowiada/nie istnieje
-
-		//JSON Node Names
+	  //JSON Node Names
 	  public static final String TAG_NAME = "name";
 	  public static final String TAG_GENDER = "gender";
 	  public static final String TAG_ADRESS = "adress";
@@ -57,29 +63,11 @@ public class MainActivity extends Activity {
 	  public static final String TAG_LATITUDE = "latitude";
 	  public static final String TAG_LONGITUDE = "longitude";
 	  public static final String TAG_DISTANCE = "distance";
-	  
-	  private static final String GETTING_DATA = "Pobieranie danych...";
-	  private static final String PROX_ALERT_INTENT = "com.example.test.ProximityIntentReceiver";
-	  
-	  private static final NumberFormat nf = new DecimalFormat("##.########");
-	  private static final NumberFormat distFormat = new DecimalFormat("##.##");
-	  private static final String POINT_LATITUDE_KEY = "POINT_LATITUDE_KEY";
-	  private static final String POINT_LONGITUDE_KEY = "POINT_LONGITUDE_KEY";
-
-//VOLLEY/////////////////////////////////////////
-	  	private static String TAG = MainActivity.class.getSimpleName();
-	  	private Button btnMakeObjectRequest, btnMakeArrayRequest;
-	    // Progress dialog
-	    private ProgressDialog pDialog;
-	    private TextView txtResponse;
-	    // temporary string to show the parsed response
-	    private String jsonResponse;
-//////////////////////////////////////////////////	    
-	    
-	 // JSONArray jArray = null;
-	  JSONArray jArrayLoc = null;
-
-	  	
+	  public static final String GETTING_DATA = "Pobieranie danych...";
+	  //private static final String PROX_ALERT_INTENT = "com.example.test.ProximityIntentReceiver";
+ 
+	 //JSONArray jArray = null;
+	 //JSONArray jArrayLoc = null;
 	  
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -89,140 +77,31 @@ public class MainActivity extends Activity {
 				
 
 // buttons, textViews
+	    gps = (TextView)findViewById(R.id.gps);
+	    dist = (TextView)findViewById(R.id.distance);
+	    //dist.setText("Odleg³oœæ od wybranego punktu:");
 		btngetdata = (Button)findViewById(R.id.btngetdata);
 	    btngetdata.setOnClickListener(new View.OnClickListener() {
 	      @Override
 	      public void onClick(View view) {
 	    	  clubList.clear();
 	    	  new JSONParse().execute();
-	    		
 	      }
            });
-	  
-	    gps = (TextView)findViewById(R.id.gps);
-	    dist = (TextView)findViewById(R.id.distance);
-	    //dist.setText("Odleg³oœæ od wybranego punktu:");
 	    
-	   /* sortBtn = (Button)findViewById(R.id.dataSort);
-	    sortBtn.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				sortuj();
-				
-			}
-		});
-*/
-	    
-// LocationManager initialization
+	    // LocationManager initialization
 	    lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 	    ll = new MyLocationListener();
 	    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);  
 	  
-	    
-		new JSONParse().execute();
-	   //	makeJsonArrayRequest();
-		
-		
+	    //Downloading data
+		new JSONParse().execute();	
 }
 	
-
-//VOLLEY//////////////////////////
-	/*private void makeJsonArrayRequest() {
-		 
-	 
-	    JsonArrayRequest req = new JsonArrayRequest(URL,
-	            new Response.Listener<JSONArray>() {
-	                @Override
-	                public void onResponse(JSONArray response) {
-	                    Log.d(TAG, response.toString());
-	 
-	                    try {
-	                        // Parsing json array response
-	                        // loop through each json object
-	                        jsonResponse = "";
-	                        //for (int i = 0; i < response.length(); i++) {
-	 
-	                            JSONObject loc = (JSONObject) response.get(1);
-	 
-	                            String latitude = loc.getString(TAG_LATITUDE);
-	                            String longitude = loc.getString(TAG_LONGITUDE);
-	                           	 
-	                            jsonResponse = latitude + "\n" + longitude + "\n\n";
-	                      //  }
-	 
-	                        txtResponse.setText(jsonResponse);
-	 
-	                    } catch (JSONException e) {
-	                        e.printStackTrace();
-	                        Toast.makeText(getApplicationContext(),
-	                                "Error: " + e.getMessage(),
-	                                Toast.LENGTH_LONG).show();
-	                    }
-	 	                  
-	                }
-	            }, new Response.ErrorListener() {
-	                @Override
-	                public void onErrorResponse(VolleyError error) {
-	                    VolleyLog.d(TAG, "Error: " + error.getMessage());
-	                    Toast.makeText(getApplicationContext(),
-	                            error.getMessage(), Toast.LENGTH_SHORT).show();
-	                    }
-	            });
-	 
-	    // Adding request to request queue
-	    Controller.getInstance().addToRequestQueue(req);
-	}*/
-//////////////////////////////////////////////////////////////////////
-	
-	private Location retrievelocationFromPreferences(String key1, String key2) {
-        SharedPreferences prefs = this.getSharedPreferences("com.example.test", Context.MODE_PRIVATE);
-        Location location = new Location("POINT_LOCATION");
-        location.setLatitude(prefs.getFloat(key1, 0));
-        location.setLongitude(prefs.getFloat(key2, 0));
-        return location;
-    }
-
-				
-	public class MyLocationListener implements LocationListener {
-		
-	    @Override
-		public void onLocationChanged(Location location) {
-	        			Location pointLocation = retrievelocationFromPreferences(POINT_LATITUDE_KEY, POINT_LONGITUDE_KEY);
-			            float distance = location.distanceTo(pointLocation);
-			        	//dist.setText("Odleg³oœæ od punktu: "+distFormat.format(distance)+"m");
-			            //Toast.makeText(MainActivity.this, "Distance from Point:"+distFormat.format(distance)+"m", Toast.LENGTH_SHORT).show();
-			            gps.setText("Szerokoœæ: "+ location.getLatitude() + " D³ugoœæ: " + location.getLongitude());
-			           
-
-			        }
-	    @Override
-		public void onStatusChanged(String s, int i, Bundle b) {           
-			        }
-	    @Override
-		public void onProviderDisabled(String s) {
-			        	
-			        }
-	    @Override
-		public void onProviderEnabled(String s) {           
-	    	
-	    	// TU JEST LIPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-/*            Location loc = lm.getLastKnownLocation(LOCATION_SERVICE);
-	    	longitude.getLongitude();
-	    	latitude.getLatitude();
-	    	double longD = loc.getLongitude();
-	    	double latiD = loc.getLatitude();
-	    	float longFloat = (float)longD;
-	    	float latiFloat = (float)latiD;
-
-	    	
-	    	saveCoordinatesInPreferences(latiFloat, longFloat);*/
-			        }
-	    
-	}
+			
 	
 	
-	//Tworzenie procesu AsyncTask
+	//Tworzenie procesu AsyncTask (pobieranie danych)
    public class JSONParse extends AsyncTask<String, String, JSONArray> {
 		public float distance;
 	     private ProgressDialog pDialog;
@@ -323,7 +202,6 @@ public class MainActivity extends Activity {
                 	  startActivity(intent);
                    }
                });
-          
            }
        } catch (JSONException e) {
          e.printStackTrace();
@@ -331,17 +209,11 @@ public class MainActivity extends Activity {
         Collections.sort(clubList, new Comparator<HashMap<String, String>>()
 				{
 				    @Override
-				    public int compare(HashMap<String, String> a, HashMap<String, String> b)
-				    {
-				       
-						//return a.distance.compareTo(b.distance);
+				    public int compare(HashMap<String, String> a, HashMap<String, String> b){
 					 return Float.compare(Float.parseFloat(a.get(TAG_DISTANCE)), Float.parseFloat(b.get(TAG_DISTANCE)));
-				    	//return b.get(TAG_DISTANCE).compareTo(a.get(TAG_DISTANCE));
 				    }
 				});
-        
       }
-
    }   
    
    @Override
@@ -369,14 +241,32 @@ public class MainActivity extends Activity {
 		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll); 
 	}
 	
-   	public void sortuj(){
- 		
- 		}
-	   private void saveCoordinatesInPreferences(float latitudeQ, float longitudeQ) {
-	         SharedPreferences prefs = this.getSharedPreferences("com.example.test", Context.MODE_PRIVATE);
-	         SharedPreferences.Editor prefsEditor = prefs.edit();
-	         prefsEditor.putFloat("POINT_LATITUDE_KEYQ", latitudeQ);
-	         prefsEditor.putFloat("POINT_LONGITUDE_KEYQ", longitudeQ);
-	         prefsEditor.commit();
-	     }
+	public class MyLocationListener implements LocationListener {
+    @Override
+	public void onLocationChanged(Location location) {
+        			Location pointLocation = retrievelocationFromPreferences("POINT_LATITUDE_KEY", "POINT_LONGITUDE_KEY");
+		            float distance = location.distanceTo(pointLocation);
+		        	//dist.setText("Odleg³oœæ od punktu: "+distFormat.format(distance)+"m");
+		            //Toast.makeText(MainActivity.this, "Distance from Point:"+distFormat.format(distance)+"m", Toast.LENGTH_SHORT).show();
+		            gps.setText("Szerokoœæ: "+ location.getLatitude() + " D³ugoœæ: " + location.getLongitude());
+		        }
+    @Override
+	public void onStatusChanged(String s, int i, Bundle b) {           
+		        }
+    @Override
+	public void onProviderDisabled(String s) {
+		        	
+		        }
+    @Override
+	public void onProviderEnabled(String s) {           
+		        } 
+	}
+	   
+	private Location retrievelocationFromPreferences(String key1, String key2) {
+        SharedPreferences prefs = this.getSharedPreferences("com.example.test", Context.MODE_PRIVATE);
+        Location location = new Location("POINT_LOCATION");
+        location.setLatitude(prefs.getFloat(key1, 0));
+        location.setLongitude(prefs.getFloat(key2, 0));
+        return location;
+    }
 }
