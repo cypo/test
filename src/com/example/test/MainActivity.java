@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
 	public LocationListener ll;
 
 	  //URL to get JSON Array
-	  public static final String URL = "http://cypo.esy.es/lodz.json"; //dodaæ wyj¹tek jeœli serwer nie odpowiada/nie istnieje
+	  public static final String URL = "http://cypo.esy.es/demo.php"; //dodaæ wyj¹tek jeœli serwer nie odpowiada/nie istnieje
 
 		//JSON Node Names
 	  public static final String TAG_NAME = "name";
@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
 	  public static final String TAG_ADRESS = "adress";
 	  public static final String TAG_BEER = "beer";
 	  public static final String TAG_SHOT = "shot";
-	  public static final String TAG_DESCRIPTION = "opis";
+	  public static final String TAG_DESCRIPTION = "descr";
 	  public static final String TAG_LOGO = "logo";
 	  public static final String TAG_LATITUDE = "latitude";
 	  public static final String TAG_LONGITUDE = "longitude";
@@ -93,8 +93,8 @@ public class MainActivity extends Activity {
 	    btngetdata.setOnClickListener(new View.OnClickListener() {
 	      @Override
 	      public void onClick(View view) {
-	    	  /*clubList.clear();
-	    	  new JSONParse().execute();*/
+	    	  clubList.clear();
+	    	  new JSONParse().execute();
 	    		
 	      }
            });
@@ -265,7 +265,7 @@ public class MainActivity extends Activity {
            for(int i=0; i<jArray.length(); i++){
            JSONObject c = jArray.getJSONObject(i);
            // Storing  JSON item in a Variable
-           String id = c.getString("Id");
+           String id = c.getString("id");
            String name = c.getString(TAG_NAME);
            String gender = c.getString(TAG_GENDER);
            String adress = c.getString(TAG_ADRESS);
